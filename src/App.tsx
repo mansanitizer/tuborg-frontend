@@ -344,7 +344,7 @@ function App() {
         </div>
         
         <p style={{ textAlign: 'center', fontSize: '18px', color: '#888', marginBottom: '20px' }}>
-          AI-Powered Dataset Builder • Generate structured data from natural language queries
+          Research collaboratively, rate and find datasets
         </p>
         
         <div style={{ marginBottom: '20px' }}>

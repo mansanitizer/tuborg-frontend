@@ -1,7 +1,7 @@
 {
   "name": "WebPuppy - AI-Powered Dataset Builder",
   "short_name": "WebPuppy",
-  "description": "Generate structured datasets from natural language queries using AI",
+  "description": "Research collaboratively, rate and find datasets",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#050816",

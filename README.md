@@ -1,6 +1,6 @@
 # 🐕 WebPuppy Frontend
 
-AI-Powered Dataset Builder - Generate structured datasets from natural language queries using artificial intelligence.
+Research collaboratively, rate and find datasets with WebPuppy's intelligent platform.
 
 ## 🚀 Features
 
