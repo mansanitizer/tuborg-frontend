@@ -79,7 +79,7 @@ export class PreprocessingError extends Error {
   }
 }
 
-const BASE_URL = 'http://localhost:8000';
+const BASE_URL = 'https://tuborg-backend-809679619810.europe-west1.run.app';
 
 async function handleResponse<T>(res: Response): Promise<T> {
   if (res.status === 429) {

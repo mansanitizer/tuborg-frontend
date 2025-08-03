@@ -30,7 +30,7 @@ function App() {
   const [currentRating, setCurrentRating] = useState<string | undefined>();
   const [statsRefreshTrigger, setStatsRefreshTrigger] = useState(0);
 
-  const API_BASE = 'http://localhost:8000';
+  const API_BASE = 'https://tuborg-backend-809679619810.europe-west1.run.app';
 
   // Health check function
   const checkHealth = async () => {
