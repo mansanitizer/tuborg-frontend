@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import type { DatasetResult } from './api/webpuppy';
 import { generateDataset, PreprocessingError } from './api/webpuppy';
 import RecentQueries from './components/RecentQueries';
@@ -7,9 +7,12 @@ import QueryValidator from './components/QueryValidator';
 import TermsOfUseModal from './components/TermsOfUseModal';
 import FeedbackComponent from './components/FeedbackComponent';
 import RatingStats from './components/RatingStats';
+import ErrorBoundary from './components/ErrorBoundary';
+import ToastContainer, { useToast } from './components/ToastContainer';
 import { validateQuery, getBlockedQueryMessage, type ValidationResult } from './utils/queryValidation';
 
-function App() {
+function AppContent() {
+  const { showToast } = useToast();
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<DatasetResult | null>(null);
@@ -38,7 +41,7 @@ function App() {
 
   const dogActivities = ['running', 'sniffing', 'licking', 'fetching', 'pooping'];
 
-  const startProgressAnimation = () => {
+  const startProgressAnimation = useCallback(() => {
     setProgress(0);
     setDogActivity('running');
     
@@ -66,9 +69,9 @@ function App() {
     // Start first activity change after 15-25 seconds
     const initialInterval = 15000 + Math.random() * 10000;
     activityInterval.current = setTimeout(changeActivity, initialInterval);
-  };
+  }, []);
 
-  const stopProgressAnimation = () => {
+  const stopProgressAnimation = useCallback(() => {
     if (progressInterval.current) {
       clearInterval(progressInterval.current);
       progressInterval.current = null;
@@ -78,10 +81,10 @@ function App() {
       activityInterval.current = null;
     }
     setProgress(0);
-  };
+  }, []);
 
   // Health check function
-  const checkHealth = async () => {
+  const checkHealth = useCallback(async () => {
     try {
       const response = await fetch(`${API_BASE}/api/health`, {
         method: 'GET',
@@ -97,7 +100,7 @@ function App() {
     } catch {
       setHealthStatus('offline');
     }
-  };
+  }, [API_BASE]);
 
   // Health polling effect
   useEffect(() => {
@@ -117,7 +120,7 @@ function App() {
     };
   }, []);
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     if (!query.trim()) {
       setError('Please describe the dataset you need to generate.');
       return;
@@ -166,7 +169,7 @@ function App() {
       setLoading(false);
       stopProgressAnimation();
     }
-  };
+  }, [query, frontendValidation, startProgressAnimation, stopProgressAnimation]);
 
   const handlePreprocessingError = (error: PreprocessingError) => {
     const { blocked_reasons, message } = error.data;
@@ -192,15 +195,15 @@ function App() {
     setPreprocessingError(userMessage);
   };
 
-  const handleValidationChange = (result: ValidationResult) => {
+  const handleValidationChange = useCallback((result: ValidationResult) => {
     setFrontendValidation(result);
-  };
+  }, []);
 
-  const handleRatingChange = (rating: string) => {
+  const handleRatingChange = useCallback((rating: string) => {
     setCurrentRating(rating);
     // Trigger stats refresh
     setStatsRefreshTrigger(prev => prev + 1);
-  };
+  }, []);
 
   const pollForResults = async (id: string) => {
     const maxAttempts = 150; // 5 minutes at 2-second intervals
@@ -219,7 +222,8 @@ function App() {
         if (data.status === 'completed') {
           setResult(data);
           setLoading(false);
-      stopProgressAnimation();
+          stopProgressAnimation();
+          showToast(`🎉 Successfully fetched ${data.total_records} records!`, 'success');
           return;
         }
         
@@ -263,7 +267,7 @@ function App() {
     }
   };
 
-  const handleQuerySelect = (selectedQuery: string) => {
+  const handleQuerySelect = useCallback((selectedQuery: string) => {
     setQuery(selectedQuery);
     // Clear any existing results/errors when selecting a new query
     setResult(null);
@@ -272,9 +276,9 @@ function App() {
     setBlockedReasons([]);
     setJobId('');
     setCurrentRating(undefined);
-  };
+  }, []);
 
-  const getHealthIcon = () => {
+  const healthInfo = useMemo(() => {
     switch (healthStatus) {
       case 'online':
         return { 
@@ -305,9 +309,7 @@ function App() {
           showText: true
         };
     }
-  };
-
-  const healthInfo = getHealthIcon();
+  }, [healthStatus, healthExpanded]);
 
   return (
     <div style={{ 
@@ -524,7 +526,90 @@ function App() {
             borderRadius: '8px',
             margin: '20px 0'
           }}>
-            <strong>🐕 Woof! Something went wrong:</strong> {error}
+            <div style={{ marginBottom: '12px' }}>
+              <strong>🐕 Woof! Something went wrong:</strong> {error}
+            </div>
+            
+            <div style={{ fontSize: '14px', opacity: 0.9, marginBottom: '12px' }}>
+              <strong>💡 What you can try:</strong>
+              <ul style={{ margin: '8px 0', paddingLeft: '20px' }}>
+                {error.includes('fetch') || error.includes('network') || error.includes('connect') ? (
+                  <>
+                    <li>Check your internet connection</li>
+                    <li>Try refreshing the page</li>
+                    <li>Wait a moment and try again</li>
+                  </>
+                ) : error.includes('timeout') || error.includes('timed out') ? (
+                  <>
+                    <li>Try a shorter, more specific query</li>
+                    <li>Break down complex requests into smaller parts</li>
+                    <li>Check if the data you're looking for exists online</li>
+                  </>
+                ) : error.includes('quota') || error.includes('limit') ? (
+                  <>
+                    <li>Wait a moment before trying again</li>
+                    <li>Try a different query</li>
+                    <li>Come back later when usage is lower</li>
+                  </>
+                ) : (
+                  <>
+                    <li>Try rephrasing your query</li>
+                    <li>Make sure your request is clear and specific</li>
+                    <li>Check the guidelines for query tips</li>
+                  </>
+                )}
+              </ul>
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+              <button
+                onClick={() => {
+                  setError('');
+                  setResult(null);
+                }}
+                style={{
+                  background: '#ffffff20',
+                  color: 'white',
+                  border: '1px solid #ffffff40',
+                  padding: '8px 12px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '12px'
+                }}
+              >
+                ✕ Dismiss
+              </button>
+              {(error.includes('fetch') || error.includes('network')) && (
+                <button
+                  onClick={() => window.location.reload()}
+                  style={{
+                    background: '#ffffff20',
+                    color: 'white',
+                    border: '1px solid #ffffff40',
+                    padding: '8px 12px',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '12px'
+                  }}
+                >
+                  🔄 Refresh Page
+                </button>
+              )}
+              <button
+                onClick={() => setShowTermsModal(true)}
+                style={{
+                  background: '#ffffff20',
+                  color: 'white',
+                  border: '1px solid #ffffff40',
+                  padding: '8px 12px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '12px'
+                }}
+              >
+                📋 View Guidelines
+              </button>
+            </div>
           </div>
         )}
 
@@ -656,22 +741,29 @@ function App() {
                   padding: '15px', 
                   borderRadius: '4px',
                   overflow: 'auto',
-                  maxHeight: '400px'
+                  maxHeight: '400px',
+                  WebkitOverflowScrolling: 'touch'
                 }}>
                   <table style={{
                     width: '100%',
                     borderCollapse: 'collapse',
-                    fontSize: '14px'
+                    fontSize: window.innerWidth <= 768 ? '12px' : '14px',
+                    minWidth: window.innerWidth <= 768 ? '600px' : 'auto'
                   }}>
                     <thead>
                       <tr style={{ background: '#1a1a1a' }}>
                         {Object.keys(result.dataset[0]).map((key) => (
                           <th key={key} style={{
                             border: '1px solid #333',
-                            padding: '10px',
+                            padding: window.innerWidth <= 768 ? '8px 6px' : '10px',
                             textAlign: 'left',
                             color: '#fff',
-                            fontWeight: 'bold'
+                            fontWeight: 'bold',
+                            position: window.innerWidth <= 768 ? 'sticky' : 'static',
+                            top: window.innerWidth <= 768 ? '0' : 'auto',
+                            backgroundColor: '#1a1a1a',
+                            zIndex: 1,
+                            whiteSpace: 'nowrap'
                           }}>
                             {key}
                           </th>
@@ -686,8 +778,12 @@ function App() {
                           {Object.values(row).map((value, valueIndex) => (
                             <td key={valueIndex} style={{
                               border: '1px solid #333',
-                              padding: '10px',
-                              color: '#ccc'
+                              padding: window.innerWidth <= 768 ? '8px 6px' : '10px',
+                              color: '#ccc',
+                              maxWidth: window.innerWidth <= 768 ? '150px' : 'none',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: window.innerWidth <= 768 ? 'nowrap' : 'normal'
                             }}>
                               {String(value)}
                             </td>
@@ -730,10 +826,37 @@ function App() {
         )}
 
         {/* Rating Statistics Section */}
-        <RatingStats refreshTrigger={statsRefreshTrigger} style="compact" />
+        <ErrorBoundary fallback={
+          <div style={{
+            padding: '12px',
+            textAlign: 'center',
+            color: '#888',
+            fontSize: '12px',
+            border: '1px solid #333',
+            borderRadius: '6px',
+            margin: '10px 0'
+          }}>
+            📊 Statistics temporarily unavailable
+          </div>
+        }>
+          <RatingStats refreshTrigger={statsRefreshTrigger} style="compact" />
+        </ErrorBoundary>
 
         {/* Recent Queries Section */}
-        <RecentQueries onQuerySelect={handleQuerySelect} />
+        <ErrorBoundary fallback={
+          <div style={{
+            background: '#1a1a1a',
+            padding: '20px',
+            borderRadius: '8px',
+            margin: '20px 0',
+            textAlign: 'center',
+            color: '#888'
+          }}>
+            🐕 Recent queries temporarily unavailable
+          </div>
+        }>
+          <RecentQueries onQuerySelect={handleQuerySelect} />
+        </ErrorBoundary>
       </div>
 
       {/* Terms of Use Modal */}
@@ -742,6 +865,14 @@ function App() {
         onClose={() => setShowTermsModal(false)} 
       />
     </div>
+  );
+}
+
+function App() {
+  return (
+    <ToastContainer>
+      <AppContent />
+    </ToastContainer>
   );
 }
 

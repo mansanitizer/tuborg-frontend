@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { getRecentQueries, type RecentQuery, type UniqueRecentQuery } from '../api/webpuppy';
 import JobDetailsModal from './JobDetailsModal';
 
@@ -179,8 +179,9 @@ const RecentQueries: React.FC<RecentQueriesProps> = ({ onQuerySelect }) => {
               fontSize: '11px',
               fontWeight: '500'
             }}
+            title="Copy this query to try again"
           >
-            🔄 Retry
+            📝 Copy Query
           </button>
         );
       case 'quota_exceeded':
@@ -200,8 +201,9 @@ const RecentQueries: React.FC<RecentQueriesProps> = ({ onQuerySelect }) => {
               fontSize: '11px',
               fontWeight: '500'
             }}
+            title="Copy this query to try again later"
           >
-            🔄 Try Again
+            📝 Copy Query
           </button>
         );
       default:
@@ -209,18 +211,121 @@ const RecentQueries: React.FC<RecentQueriesProps> = ({ onQuerySelect }) => {
     }
   };
 
-  if (loading) {
-    return (
-      <div style={{
-        background: '#1a1a1a',
-        padding: '20px',
-        borderRadius: '8px',
-        margin: '20px 0',
-        textAlign: 'center'
+  // Skeleton loading component
+  const SkeletonLoader = () => (
+    <div style={{
+      background: '#1a1a1a',
+      padding: '20px',
+      borderRadius: '8px',
+      margin: '20px 0'
+    }}>
+      <div style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'space-between',
+        marginBottom: '15px'
       }}>
-        <p>🐕 WebPuppy is sniffing around for recent questions...</p>
+        <div style={{
+          width: '200px',
+          height: '24px',
+          background: 'linear-gradient(90deg, #333 25%, #555 50%, #333 75%)',
+          backgroundSize: '200% 100%',
+          animation: 'shimmer 1.5s infinite',
+          borderRadius: '4px'
+        }} />
+        <div style={{
+          width: '80px',
+          height: '32px',
+          background: 'linear-gradient(90deg, #333 25%, #555 50%, #333 75%)',
+          backgroundSize: '200% 100%',
+          animation: 'shimmer 1.5s infinite',
+          borderRadius: '4px'
+        }} />
       </div>
-    );
+
+      {/* Tab skeleton */}
+      <div style={{
+        display: 'flex',
+        marginBottom: '15px',
+        borderBottom: '1px solid #333'
+      }}>
+        {[1, 2].map(i => (
+          <div key={i} style={{
+            width: '120px',
+            height: '40px',
+            background: 'linear-gradient(90deg, #333 25%, #555 50%, #333 75%)',
+            backgroundSize: '200% 100%',
+            animation: 'shimmer 1.5s infinite',
+            borderRadius: '4px',
+            margin: '0 10px 10px 0'
+          }} />
+        ))}
+      </div>
+
+      {/* Query items skeleton */}
+      {[1, 2, 3].map(i => (
+        <div key={i} style={{
+          padding: '12px',
+          border: '1px solid #333',
+          borderRadius: '6px',
+          marginBottom: '8px'
+        }}>
+          <div style={{
+            width: '85%',
+            height: '16px',
+            background: 'linear-gradient(90deg, #333 25%, #555 50%, #333 75%)',
+            backgroundSize: '200% 100%',
+            animation: 'shimmer 1.5s infinite',
+            borderRadius: '4px',
+            marginBottom: '8px'
+          }} />
+          <div style={{
+            display: 'flex',
+            gap: '10px',
+            alignItems: 'center'
+          }}>
+            <div style={{
+              width: '60px',
+              height: '12px',
+              background: 'linear-gradient(90deg, #333 25%, #555 50%, #333 75%)',
+              backgroundSize: '200% 100%',
+              animation: 'shimmer 1.5s infinite',
+              borderRadius: '4px'
+            }} />
+            <div style={{
+              width: '80px',
+              height: '12px',
+              background: 'linear-gradient(90deg, #333 25%, #555 50%, #333 75%)',
+              backgroundSize: '200% 100%',
+              animation: 'shimmer 1.5s infinite',
+              borderRadius: '4px'
+            }} />
+            <div style={{
+              width: '100px',
+              height: '24px',
+              background: 'linear-gradient(90deg, #333 25%, #555 50%, #333 75%)',
+              backgroundSize: '200% 100%',
+              animation: 'shimmer 1.5s infinite',
+              borderRadius: '4px',
+              marginLeft: 'auto'
+            }} />
+          </div>
+        </div>
+      ))}
+
+      <style>
+        {`
+          @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+          }
+        `}
+      </style>
+    </div>
+  );
+
+  if (loading) {
+    return <SkeletonLoader />;
   }
 
   if (error) {
@@ -328,23 +433,29 @@ const RecentQueries: React.FC<RecentQueriesProps> = ({ onQuerySelect }) => {
               {recentQueries.map((query, index) => (
                 <div
                   key={index}
-                  onClick={() => onQuerySelect?.(query.query)}
+                  onClick={() => {
+                    if (query.job_id) {
+                      handleViewResults(query.job_id);
+                    }
+                  }}
                   style={{
                     padding: '12px',
                     border: '1px solid #333',
                     borderRadius: '6px',
                     marginBottom: '8px',
-                    cursor: onQuerySelect ? 'pointer' : 'default',
-                    transition: 'all 0.2s ease'
+                    cursor: query.job_id ? 'pointer' : 'default',
+                    transition: 'all 0.2s ease',
+                    opacity: query.job_id ? 1 : 0.6
                   }}
+                  title={query.job_id ? 'Click to view full results and details' : 'No job details available'}
                   onMouseEnter={(e) => {
-                    if (onQuerySelect) {
+                    if (query.job_id) {
                       e.currentTarget.style.borderColor = '#60a5fa';
                       e.currentTarget.style.background = '#222';
                     }
                   }}
                   onMouseLeave={(e) => {
-                    if (onQuerySelect) {
+                    if (query.job_id) {
                       e.currentTarget.style.borderColor = '#333';
                       e.currentTarget.style.background = 'transparent';
                     }
@@ -419,7 +530,12 @@ const RecentQueries: React.FC<RecentQueriesProps> = ({ onQuerySelect }) => {
               {uniqueQueries.map((query, index) => (
                 <div
                   key={index}
-                  onClick={() => onQuerySelect?.(query.query)}
+                  onClick={() => {
+                    // Popular queries don't have job_id, so we offer to copy the query
+                    if (onQuerySelect) {
+                      onQuerySelect(query.query);
+                    }
+                  }}
                   style={{
                     padding: '12px',
                     border: '1px solid #333',
@@ -428,6 +544,7 @@ const RecentQueries: React.FC<RecentQueriesProps> = ({ onQuerySelect }) => {
                     cursor: onQuerySelect ? 'pointer' : 'default',
                     transition: 'all 0.2s ease'
                   }}
+                  title="Click to copy this query to your input box"
                   onMouseEnter={(e) => {
                     if (onQuerySelect) {
                       e.currentTarget.style.borderColor = '#60a5fa';
@@ -495,4 +612,4 @@ const RecentQueries: React.FC<RecentQueriesProps> = ({ onQuerySelect }) => {
   );
 };
 
-export default RecentQueries;
+export default memo(RecentQueries);

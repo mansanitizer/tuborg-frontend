@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import { 
   getRawData, 
   getJobResults, 
@@ -509,4 +509,4 @@ const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
   );
 };
 
-export default JobDetailsModal;
+export default memo(JobDetailsModal);

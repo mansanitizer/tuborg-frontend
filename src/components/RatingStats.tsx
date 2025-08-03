@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { getRatingStats, type RatingStats as RatingStatsType } from '../api/webpuppy';
 
 interface RatingStatsProps {
@@ -31,17 +31,105 @@ const RatingStats: React.FC<RatingStatsProps> = ({ refreshTrigger, style = 'defa
 
   const isCompact = style === 'compact';
 
-  if (loading) {
-    return (
+  // Skeleton loading component
+  const SkeletonLoader = () => (
+    <div style={{
+      margin: isCompact ? '10px 0' : '20px 0',
+      padding: isCompact ? '12px' : '20px',
+      border: '1px solid #333',
+      borderRadius: isCompact ? '6px' : '8px',
+      backgroundColor: '#1a1a1a',
+      color: 'white'
+    }}>
+      {/* Title skeleton */}
       <div style={{
-        padding: isCompact ? '12px' : '20px',
-        textAlign: 'center',
-        color: '#888',
-        fontSize: isCompact ? '12px' : '14px'
+        width: '180px',
+        height: isCompact ? '14px' : '16px',
+        background: 'linear-gradient(90deg, #333 25%, #555 50%, #333 75%)',
+        backgroundSize: '200% 100%',
+        animation: 'shimmer 1.5s infinite',
+        borderRadius: '4px',
+        margin: '0 auto 15px auto'
+      }} />
+      
+      {/* Stats grid skeleton */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: isCompact ? 'repeat(3, 1fr)' : 'repeat(auto-fit, minmax(120px, 1fr))',
+        gap: isCompact ? '8px' : '16px',
+        marginBottom: '15px'
       }}>
-        📊 Loading statistics...
+        {[1, 2, 3].map(i => (
+          <div key={i} style={{
+            textAlign: 'center',
+            padding: isCompact ? '8px' : '12px',
+            borderRadius: '6px',
+            backgroundColor: '#0a0a0a',
+            border: '1px solid #333'
+          }}>
+            <div style={{
+              width: isCompact ? '20px' : '24px',
+              height: isCompact ? '16px' : '20px',
+              background: 'linear-gradient(90deg, #333 25%, #555 50%, #333 75%)',
+              backgroundSize: '200% 100%',
+              animation: 'shimmer 1.5s infinite',
+              borderRadius: '4px',
+              margin: '0 auto 4px auto'
+            }} />
+            <div style={{
+              width: isCompact ? '50px' : '60px',
+              height: isCompact ? '10px' : '12px',
+              background: 'linear-gradient(90deg, #333 25%, #555 50%, #333 75%)',
+              backgroundSize: '200% 100%',
+              animation: 'shimmer 1.5s infinite',
+              borderRadius: '4px',
+              margin: '0 auto 2px auto'
+            }} />
+            {i > 1 && (
+              <div style={{
+                width: '30px',
+                height: isCompact ? '11px' : '13px',
+                background: 'linear-gradient(90deg, #333 25%, #555 50%, #333 75%)',
+                backgroundSize: '200% 100%',
+                animation: 'shimmer 1.5s infinite',
+                borderRadius: '4px',
+                margin: '0 auto'
+              }} />
+            )}
+          </div>
+        ))}
       </div>
-    );
+      
+      {/* Progress bar skeleton */}
+      <div style={{
+        height: isCompact ? '6px' : '8px',
+        borderRadius: '4px',
+        backgroundColor: '#333',
+        marginTop: '10px',
+        overflow: 'hidden'
+      }}>
+        <div style={{
+          width: '100%',
+          height: '100%',
+          background: 'linear-gradient(90deg, #333 25%, #555 50%, #333 75%)',
+          backgroundSize: '200% 100%',
+          animation: 'shimmer 1.5s infinite'
+        }} />
+      </div>
+
+      <style>
+        {`
+          @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+          }
+        `}
+      </style>
+    </div>
+  );
+
+  if (loading) {
+    return <SkeletonLoader />;
   }
 
   if (error) {
@@ -221,4 +309,4 @@ const RatingStats: React.FC<RatingStatsProps> = ({ refreshTrigger, style = 'defa
   );
 };
 
-export default RatingStats;
+export default memo(RatingStats);
