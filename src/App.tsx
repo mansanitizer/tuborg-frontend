@@ -326,21 +326,43 @@ function App() {
           }}>
             🐕 WebPuppy
           </h1>
-          <button
-            onClick={() => setShowTermsModal(true)}
-            style={{
-              background: 'none',
-              border: '1px solid #333',
-              color: '#60a5fa',
-              padding: '8px 12px',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontSize: '12px',
-              textDecoration: 'none'
-            }}
-          >
-            📋 Guidelines
-          </button>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <a
+              href="https://iarm.xyz"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                background: 'none',
+                border: '1px solid #333',
+                color: '#60a5fa',
+                padding: '8px 12px',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '12px',
+                textDecoration: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}
+            >
+              🏠 Home
+            </a>
+            <button
+              onClick={() => setShowTermsModal(true)}
+              style={{
+                background: 'none',
+                border: '1px solid #333',
+                color: '#60a5fa',
+                padding: '8px 12px',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '12px',
+                textDecoration: 'none'
+              }}
+            >
+              📋 Guidelines
+            </button>
+          </div>
         </div>
         
         <p style={{ textAlign: 'center', fontSize: '18px', color: '#888', marginBottom: '20px' }}>
