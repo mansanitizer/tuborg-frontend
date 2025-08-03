@@ -166,7 +166,7 @@ function App() {
         }
         
         if (data.status === 'failed') {
-          setError('Dataset generation failed. The requested data could not be found or processed.');
+          setError('Data fetching failed. The requested data could not be found or processed.');
           setLoading(false);
           return;
         }
@@ -434,7 +434,7 @@ function App() {
               loading ? 'Processing...' : 'Submit query'
             }
           >
-            {loading ? '🔄 Generating...' : '🚀 Generate Dataset'}
+            {loading ? '🔄 Fetching...' : '🚀 Fetch Data'}
           </button>
           
           {result && (
@@ -527,7 +527,7 @@ function App() {
             borderRadius: '8px',
             margin: '20px 0'
           }}>
-            <p>🔄 Generating your dataset... This may take a few minutes.</p>
+            <p>🔄 Fetching your data... This may take a few minutes.</p>
             <p style={{ fontSize: '14px', opacity: 0.7 }}>Our AI is researching, extracting, and validating data for you.</p>
             {jobId && <p><small>🏷️ Job ID: {jobId}</small></p>}
           </div>
@@ -546,7 +546,7 @@ function App() {
             borderRadius: '8px',
             margin: '20px 0'
           }}>
-            <h3>📊 Generated Dataset</h3>
+            <h3>📊 Fetched Dataset</h3>
             <p><strong>Query:</strong> {result.query}</p>
             <p><strong>Status:</strong> {result.status}</p>
             <p><strong>Total Records:</strong> {result.total_records}</p>

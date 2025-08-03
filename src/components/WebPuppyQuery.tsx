@@ -139,7 +139,7 @@ const WebPuppyQuery: React.FC = () => {
         border: '1px solid #243b55',
       }}
     >
-      <h2 style={{ marginTop: 0 }}>Webhound Dataset Generator</h2>
+      <h2 style={{ marginTop: 0 }}>Webhound Data Fetcher</h2>
 
       {checkingHealth ? (
         <p>Checking backend health...</p>
@@ -180,7 +180,7 @@ const WebPuppyQuery: React.FC = () => {
                   cursor: loading ? 'not-allowed' : 'pointer',
                 }}
               >
-                {loading ? 'Processing...' : 'Generate Dataset'}
+                {loading ? 'Fetching...' : 'Fetch Data'}
               </button>
 
               <button
@@ -249,7 +249,7 @@ const WebPuppyQuery: React.FC = () => {
               }}
             >
               <p style={{ margin: '4px 0' }}>
-                Processing your query... This may take a few minutes.
+                Fetching your data... This may take a few minutes.
               </p>
               <p style={{ margin: '4px 0', opacity: 0.8 }}>Job ID: {jobId}</p>
             </div>

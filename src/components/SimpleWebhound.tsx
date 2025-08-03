@@ -5,7 +5,7 @@ const SimpleWebhound: React.FC = () => {
 
   return (
     <div style={{ padding: '20px', background: '#0b1220', color: 'white', margin: '20px' }}>
-      <h2>Webhound Dataset Generator</h2>
+      <h2>Webhound Data Fetcher</h2>
       <textarea
         value={query}
         onChange={(e) => setQuery(e.target.value)}
@@ -13,7 +13,7 @@ const SimpleWebhound: React.FC = () => {
         style={{ width: '100%', height: '100px', padding: '10px' }}
       />
       <button style={{ marginTop: '10px', padding: '10px 20px' }}>
-        Generate Dataset
+        Fetch Data
       </button>
     </div>
   );
