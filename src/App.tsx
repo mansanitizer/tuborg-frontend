@@ -533,12 +533,6 @@ function App() {
           </div>
         )}
 
-        {/* Rating Statistics Section */}
-        <RatingStats refreshTrigger={statsRefreshTrigger} style="compact" />
-
-        {/* Recent Queries Section */}
-        <RecentQueries onQuerySelect={handleQuerySelect} />
-
         {result && (
           <div style={{
             background: '#1a1a1a',
@@ -642,6 +636,12 @@ function App() {
             />
           </div>
         )}
+
+        {/* Rating Statistics Section */}
+        <RatingStats refreshTrigger={statsRefreshTrigger} style="compact" />
+
+        {/* Recent Queries Section */}
+        <RecentQueries onQuerySelect={handleQuerySelect} />
       </div>
 
       {/* Terms of Use Modal */}
