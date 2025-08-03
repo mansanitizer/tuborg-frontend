@@ -29,7 +29,7 @@ const RecentQueries: React.FC<RecentQueriesProps> = ({ onQuerySelect }) => {
       setRecentQueries(data.recent_queries);
       setUniqueQueries(data.unique_queries);
     } catch {
-      setError('🐕 DataDog couldn\'t sniff out recent queries!');
+      setError('🐕 WebPuppy couldn\'t sniff out recent queries!');
     } finally {
       setLoading(false);
     }
@@ -218,7 +218,7 @@ const RecentQueries: React.FC<RecentQueriesProps> = ({ onQuerySelect }) => {
         margin: '20px 0',
         textAlign: 'center'
       }}>
-        <p>🐕 DataDog is sniffing around for recent questions...</p>
+        <p>🐕 WebPuppy is sniffing around for recent questions...</p>
       </div>
     );
   }
@@ -263,7 +263,7 @@ const RecentQueries: React.FC<RecentQueriesProps> = ({ onQuerySelect }) => {
         justifyContent: 'space-between',
         marginBottom: '15px'
       }}>
-        <h3 style={{ margin: 0 }}>🐕 What others asked DataDog</h3>
+        <h3 style={{ margin: 0 }}>🐕 What others asked WebPuppy</h3>
         <button 
           onClick={fetchRecentQueries}
           style={{
@@ -321,7 +321,7 @@ const RecentQueries: React.FC<RecentQueriesProps> = ({ onQuerySelect }) => {
         <div>
           {recentQueries.length === 0 ? (
             <p style={{ color: '#888', textAlign: 'center', padding: '20px 0' }}>
-              🐕 No recent queries found. Be the first to ask DataDog something!
+              🐕 No recent queries found. Be the first to ask WebPuppy something!
             </p>
           ) : (
             <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
@@ -412,7 +412,7 @@ const RecentQueries: React.FC<RecentQueriesProps> = ({ onQuerySelect }) => {
         <div>
           {uniqueQueries.length === 0 ? (
             <p style={{ color: '#888', textAlign: 'center', padding: '20px 0' }}>
-              🐕 No popular queries yet. Start asking DataDog questions!
+              🐕 No popular queries yet. Start asking WebPuppy questions!
             </p>
           ) : (
             <div style={{ maxHeight: '300px', overflowY: 'auto' }}>

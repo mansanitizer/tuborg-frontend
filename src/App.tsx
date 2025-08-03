@@ -105,7 +105,7 @@ function App() {
         // Handle preprocessing-specific errors from backend
         handlePreprocessingError(err);
       } else {
-        setError(err instanceof Error ? `🐕 DataDog couldn't start the fetch: ${err.message}` : '🐕 DataDog is having trouble getting started!');
+        setError(err instanceof Error ? `🐕 WebPuppy couldn't start the fetch: ${err.message}` : '🐕 WebPuppy is having trouble getting started!');
       }
       setLoading(false);
     }
@@ -119,17 +119,17 @@ function App() {
     let userMessage = message;
     
     if (blocked_reasons.includes('too_short')) {
-      userMessage = '🐕 DataDog needs more details! Your query is too short - try adding more context.';
+      userMessage = '🐕 WebPuppy needs more details! Your query is too short - try adding more context.';
     } else if (blocked_reasons.includes('too_long')) {
-      userMessage = '🐕 DataDog is overwhelmed! Your query is too long - try breaking it into smaller questions.';
+      userMessage = '🐕 WebPuppy is overwhelmed! Your query is too long - try breaking it into smaller questions.';
     } else if (blocked_reasons.includes('nsfw_content')) {
-      userMessage = '🐕 DataDog detected inappropriate content! Keep queries professional and family-friendly.';
+      userMessage = '🐕 WebPuppy detected inappropriate content! Keep queries professional and family-friendly.';
     } else if (blocked_reasons.includes('prompt_injection')) {
-      userMessage = '🐕 DataDog detected unusual patterns! Ask your question directly without system commands.';
+      userMessage = '🐕 WebPuppy detected unusual patterns! Ask your question directly without system commands.';
     } else if (blocked_reasons.includes('misuse_pattern')) {
-      userMessage = '🐕 DataDog detected spam-like patterns! Use natural language without excessive repetition.';
+      userMessage = '🐕 WebPuppy detected spam-like patterns! Use natural language without excessive repetition.';
     } else if (blocked_reasons.includes('suspicious_pattern')) {
-      userMessage = '🐕 DataDog detected suspicious patterns! Use clear, natural language for your questions.';
+      userMessage = '🐕 WebPuppy detected suspicious patterns! Use clear, natural language for your questions.';
     }
     
     setPreprocessingError(userMessage);

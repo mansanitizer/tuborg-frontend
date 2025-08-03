@@ -53,10 +53,10 @@ const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
 
       // If both failed, show error
       if (jobResults.status === 'rejected' && rawResults.status === 'rejected') {
-        setError('🐕 DataDog couldn\'t fetch the job data. It might have expired!');
+        setError('🐕 WebPuppy couldn\'t fetch the job data. It might have expired!');
       }
     } catch {
-      setError('🐕 DataDog encountered an error fetching the data!');
+      setError('🐕 WebPuppy encountered an error fetching the data!');
     } finally {
       setLoading(false);
     }
@@ -241,7 +241,7 @@ const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
             textAlign: 'center',
             color: '#888'
           }}>
-            <p>🐕 DataDog is fetching the job details...</p>
+            <p>🐕 WebPuppy is fetching the job details...</p>
           </div>
         )}
 
