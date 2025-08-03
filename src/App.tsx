@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { DatasetResult } from './api/webpuppy';
 import { generateDataset, PreprocessingError } from './api/webpuppy';
 import RecentQueries from './components/RecentQueries';
@@ -29,8 +29,56 @@ function App() {
   });
   const [currentRating, setCurrentRating] = useState<string | undefined>();
   const [statsRefreshTrigger, setStatsRefreshTrigger] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const [dogActivity, setDogActivity] = useState('running');
+  const progressInterval = useRef<number | null>(null);
+  const activityInterval = useRef<number | null>(null);
 
   const API_BASE = 'https://tuborg-backend-809679619810.europe-west1.run.app';
+
+  const dogActivities = ['running', 'sniffing', 'licking', 'fetching', 'pooping'];
+
+  const startProgressAnimation = () => {
+    setProgress(0);
+    setDogActivity('running');
+    
+    // Progress bar animation - reaches 95% over 2 minutes
+    progressInterval.current = setInterval(() => {
+      setProgress(prev => {
+        const increment = 95 / (120 * 1000 / 100); // 95% over 2 minutes in 100ms increments
+        return Math.min(prev + increment, 95);
+      });
+    }, 100);
+
+    // Dog activity changes every 15-25 seconds
+    const changeActivity = () => {
+      setDogActivity(prev => {
+        const currentIndex = dogActivities.indexOf(prev);
+        const nextIndex = (currentIndex + 1) % dogActivities.length;
+        return dogActivities[nextIndex];
+      });
+      
+      // Random interval between 15-25 seconds
+      const nextInterval = 15000 + Math.random() * 10000;
+      activityInterval.current = setTimeout(changeActivity, nextInterval);
+    };
+    
+    // Start first activity change after 15-25 seconds
+    const initialInterval = 15000 + Math.random() * 10000;
+    activityInterval.current = setTimeout(changeActivity, initialInterval);
+  };
+
+  const stopProgressAnimation = () => {
+    if (progressInterval.current) {
+      clearInterval(progressInterval.current);
+      progressInterval.current = null;
+    }
+    if (activityInterval.current) {
+      clearTimeout(activityInterval.current);
+      activityInterval.current = null;
+    }
+    setProgress(0);
+  };
 
   // Health check function
   const checkHealth = async () => {
@@ -62,6 +110,13 @@ function App() {
     return () => clearInterval(healthInterval);
   }, []);
 
+  // Cleanup progress animations on unmount
+  useEffect(() => {
+    return () => {
+      stopProgressAnimation();
+    };
+  }, []);
+
   const handleSubmit = async () => {
     if (!query.trim()) {
       setError('Please describe the dataset you need to generate.');
@@ -91,6 +146,7 @@ function App() {
     setBlockedReasons([]);
     setResult(null);
     setCurrentRating(undefined);
+    startProgressAnimation();
     
     try {
       // Use the new generateDataset function which handles preprocessing errors
@@ -108,6 +164,7 @@ function App() {
         setError(err instanceof Error ? `🐕 WebPuppy couldn't start the fetch: ${err.message}` : '🐕 WebPuppy is having trouble getting started!');
       }
       setLoading(false);
+      stopProgressAnimation();
     }
   };
 
@@ -162,18 +219,21 @@ function App() {
         if (data.status === 'completed') {
           setResult(data);
           setLoading(false);
+      stopProgressAnimation();
           return;
         }
         
         if (data.status === 'failed') {
           setError('Data fetching failed. The requested data could not be found or processed.');
           setLoading(false);
+      stopProgressAnimation();
           return;
         }
         
         if (data.status === 'quota_exceeded') {
           setError('Daily usage limit reached. Please try again later or upgrade your plan.');
           setLoading(false);
+      stopProgressAnimation();
           return;
         }
         
@@ -184,11 +244,13 @@ function App() {
         } else {
           setError('Request timed out. Please try again with a more specific query.');
           setLoading(false);
+      stopProgressAnimation();
         }
         
       } catch (err) {
         setError(err instanceof Error ? `Generation failed: ${err.message}` : 'An unexpected error occurred. Please try again.');
         setLoading(false);
+      stopProgressAnimation();
       }
     };
     
@@ -527,6 +589,36 @@ function App() {
             borderRadius: '8px',
             margin: '20px 0'
           }}>
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '10px', 
+              marginBottom: '15px' 
+            }}>
+              <span style={{ fontSize: '20px' }}>🐕</span>
+              <span style={{ fontSize: '16px', fontWeight: '500' }}>
+                WebPuppy is {dogActivity}...
+              </span>
+            </div>
+            
+            {/* Progress Bar */}
+            <div style={{
+              width: '100%',
+              height: '8px',
+              backgroundColor: '#333',
+              borderRadius: '4px',
+              overflow: 'hidden',
+              marginBottom: '15px'
+            }}>
+              <div style={{
+                width: `${progress}%`,
+                height: '100%',
+                backgroundColor: '#60a5fa',
+                borderRadius: '4px',
+                transition: 'width 0.1s ease-out'
+              }} />
+            </div>
+            
             <p>🔄 Fetching your data... This may take a few minutes.</p>
             <p style={{ fontSize: '14px', opacity: 0.7 }}>Our AI is researching, extracting, and validating data for you.</p>
             {jobId && <p><small>🏷️ Job ID: {jobId}</small></p>}
